@@ -1,0 +1,12 @@
+CC=gcc
+CXX=g++
+
+# CFLAGS=
+# CXXFLAGS=
+# LDFLAGS=
+CPU_TYPE=x86-64
+CPU_TARGET=nehalem
+
+BUILD_TYPE=Release
+
+packages=(pystring fmt getopt spirv-tools "glslang -optimizer" spirv-cross sokol-shdc sokol)
