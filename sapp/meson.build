@@ -1,11 +1,11 @@
 sokol_dep = dependency('sokol')
-libgl_dep = dependency('opengl')
 
-sokol_sapp_deps = [sokol_dep, libgl_dep]
+sokol_sapp_deps = [ sokol_dep ]
 
 cc = meson.get_compiler('c')
 
 if host_machine.system() == 'linux'
+    sokol_sapp_deps += dependency('opengl')
     sokol_sapp_deps += dependency('x11')
     sokol_sapp_deps += dependency('xcursor')
     sokol_sapp_deps += dependency('xi')
