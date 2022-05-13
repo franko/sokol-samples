@@ -1,21 +1,28 @@
-sokol_dep = dependency('sokol')
-
-sokol_sapp_deps = [ sokol_dep ]
+sokol_target = 'glcore33'
 
 cc = meson.get_compiler('c')
 
-if host_machine.system() == 'linux'
-    sokol_sapp_deps += dependency('opengl')
-    sokol_sapp_deps += dependency('x11')
-    sokol_sapp_deps += dependency('xcursor')
-    sokol_sapp_deps += dependency('xi')
-    sokol_sapp_deps += cc.find_library('m')
-    sokol_sapp_deps += cc.find_library('dl')
+if host_machine.system() == 'windows'
+    sokol_sys_libs = ['kernel32', 'user32', 'shell32', 'gdi32']
+    if sokol_target == 'd3d11'
+        sokol_sys_libs += ['dxgi', 'd3d11']
+    endif
+    sokol_dep_names = ['sokol']
+elif host_machine.system() == 'linux'
+    sokol_sys_libs = ['m', 'dl']
+    sokol_dep_names = ['opengl', 'x11', 'xcursor', 'xi', 'sokol']
 endif
 
-sokol_shdc = find_program('sokol-shdc')
+sokol_sapp_deps = []
+foreach lib : sokol_sys_libs
+    sokol_sapp_deps += cc.find_library(lib)
+endforeach
 
-sokol_target = 'glcore33'
+foreach dep_name : sokol_dep_names
+    sokol_sapp_deps += dependency(dep_name)
+endforeach
+
+sokol_shdc = find_program('sokol-shdc')
 
 # https://github.com/floooh/sokol-tools/blob/master/docs/sokol-shdc.md
 sokol_defs = {
@@ -31,15 +38,22 @@ sokol_defs = {
 sokol_sapp_cargs = ['-DSOKOL_IMPL', sokol_defs[sokol_target][0]]
 sokol_sapp_slang = sokol_defs[sokol_target][1]
 
-shapes_glsl_h = custom_target('shapes-glsl-h',
-    input : 'shapes-sapp.glsl',
-    output : 'shapes-sapp.glsl.h',
-    command : [sokol_shdc, '--input', '@INPUT@', '--output', '@OUTPUT0@', '--slang', sokol_sapp_slang]
-)
+sokol_apps = [
+    {'name' : 'shapes', 'shader' : 'shapes-sapp.glsl', 'sources' : ['shapes-sapp.c']},
+    {'name' : 'cube',   'shader' : 'cube-sapp.glsl',   'sources' : ['cube-sapp.c']},
+]
 
-executable('shapes-sapp', ['shapes-sapp.c', shapes_glsl_h],
-    c_args : sokol_sapp_cargs,
-    dependencies : sokol_sapp_deps,
-    include_directories : sokol_libs_include,
-    win_subsystem : 'windows'
-)
+foreach app : sokol_apps
+    glsl_h = custom_target(app['shader'],
+        input : app['shader'],
+        output : app['shader'] + '.h',
+        command : [sokol_shdc, '--input', '@INPUT@', '--output', '@OUTPUT0@', '--slang', sokol_sapp_slang]
+    )
+    executable(app['name'] + '-sapp', app['sources'] + [glsl_h],
+        c_args : sokol_sapp_cargs,
+        dependencies : sokol_sapp_deps,
+        include_directories : sokol_libs_include,
+        win_subsystem : 'windows'
+    )
+endforeach
+
