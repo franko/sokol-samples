@@ -49,6 +49,9 @@ foreach app : sokol_apps
         output : app['shader'] + '.h',
         command : [sokol_shdc, '--input', '@INPUT@', '--output', '@OUTPUT0@', '--slang', sokol_sapp_slang]
     )
+    if app['name'] == 'cube'
+        sokol_cube_shader = glsl_h
+    endif
     executable(app['name'] + '-sapp', app['sources'] + [glsl_h],
         c_args : sokol_sapp_cargs,
         dependencies : sokol_sapp_deps,
@@ -56,4 +59,13 @@ foreach app : sokol_apps
         win_subsystem : 'windows'
     )
 endforeach
+
+sdl_dep = dependency('sdl2', method : 'config-tool')
+
+executable('cube-sdl2', ['cube-sdl2.c'] + [sokol_cube_shader],
+    c_args : sokol_sapp_cargs,
+    dependencies : sokol_sapp_deps + [sdl_dep],
+    include_directories : sokol_libs_include,
+    win_subsystem : 'windows'
+)
 
