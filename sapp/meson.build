@@ -39,8 +39,10 @@ sokol_sapp_cargs = ['-DSOKOL_IMPL', sokol_defs[sokol_target][0]]
 sokol_sapp_slang = sokol_defs[sokol_target][1]
 
 sokol_apps = [
-    {'name' : 'shapes', 'shader' : 'shapes-sapp.glsl', 'sources' : ['shapes-sapp.c']},
-    {'name' : 'cube',   'shader' : 'cube-sapp.glsl',   'sources' : ['cube-sapp.c']},
+    {'name' : 'shapes',    'shader' : 'shapes-sapp.glsl',    'sources' : ['shapes-sapp.c']},
+    {'name' : 'cube',      'shader' : 'cube-sapp.glsl',      'sources' : ['cube-sapp.c']},
+    {'name' : 'offscreen', 'shader' : 'offscreen-sapp.glsl', 'sources' : ['offscreen-sapp.c']},
+    {'name' : 'sdf',       'shader' : 'sdf-sapp.glsl',       'sources' : ['sdf-sapp.c']},
 ]
 
 foreach app : sokol_apps
@@ -88,6 +90,16 @@ pixelformats_glsl_h = custom_target('pixelformats-glsl',
 executable('pixelformats-sapp', ['pixelformats-sapp.c', pixelformats_glsl_h],
     c_args : sokol_sapp_cargs,
     dependencies : sokol_sapp_deps + [cimgui_dep],
+    include_directories : sokol_libs_include,
+    win_subsystem : 'windows'
+)
+
+imgui_dep = dependency('imgui')
+imgui_demo_dep = dependency('imguidemo')
+
+executable('imgui-highdpi-sapp', 'imgui-highdpi-sapp.cc',
+    cpp_args : sokol_sapp_cargs,
+    dependencies : sokol_sapp_deps + [imgui_dep, imgui_demo_dep],
     include_directories : sokol_libs_include,
     win_subsystem : 'windows'
 )
