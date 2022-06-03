@@ -69,3 +69,26 @@ executable('cube-sdl2', ['cube-sdl2.c'] + [sokol_cube_shader],
     win_subsystem : 'windows'
 )
 
+cimgui_dep = dependency('cimgui')
+
+executable('cimgui-sapp', 'cimgui-sapp.c',
+    c_args : sokol_sapp_cargs,
+    dependencies : sokol_sapp_deps + [cimgui_dep],
+    include_directories : sokol_libs_include,
+    win_subsystem : 'windows'
+)
+
+
+pixelformats_glsl_h = custom_target('pixelformats-glsl',
+    input : 'pixelformats-sapp.glsl',
+    output : 'pixelformats-sapp.glsl.h',
+    command : [sokol_shdc, '--input', '@INPUT@', '--output', '@OUTPUT0@', '--slang', sokol_sapp_slang]
+)
+
+executable('pixelformats-sapp', ['pixelformats-sapp.c', pixelformats_glsl_h],
+    c_args : sokol_sapp_cargs,
+    dependencies : sokol_sapp_deps + [cimgui_dep],
+    include_directories : sokol_libs_include,
+    win_subsystem : 'windows'
+)
+
